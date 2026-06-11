@@ -4,6 +4,21 @@ from frappe.core.doctype.file.file import File as FrappeFile
 from frappe.core.doctype.file.utils import get_content_hash
 from frappe.utils import get_files_path, now
 
+# dfp_external_storage ALSO overrides the File doctype class. Only one
+# override_doctype_class wins (Drive does), which would shadow dfp's storage
+# methods and make dfp's File doc-events crash ('File' has no attribute
+# 'dfp_external_storage_upload_file'). Extend dfp's File when installed so the
+# active class carries BOTH apps' behaviour. Drive's overrides only act on
+# is_drive_file rows (see @only_for_drive_files), and dfp's upload no-ops on
+# folders / files without a storage assigned, so neither app touches the other's
+# files. Fall back to the framework File when dfp isn't installed.
+try:
+    from dfp_external_storage.dfp_external_storage.doctype.dfp_external_storage.dfp_external_storage import (
+        DFPExternalStorageFile as FrappeFile,
+    )
+except Exception:
+    pass
+
 from drive.api.files import get_file_type
 from drive.api.permissions import get_user_access, user_has_permission
 from drive.api.product import invite_users
