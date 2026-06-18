@@ -1,9 +1,15 @@
+from __future__ import annotations
+
 import os
+from typing import TYPE_CHECKING
 
 import frappe
 import requests
 from frappe.rate_limiter import rate_limit
 from frappe.utils import now
+
+if TYPE_CHECKING:
+    from frappe.core.doctype.user.user import User
 
 
 def mark_as_viewed(entity):
